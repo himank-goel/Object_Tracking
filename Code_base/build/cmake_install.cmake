@@ -1,4 +1,4 @@
-# Install script for directory: /home/himank-goel/Documents/Ext Project/Code_base
+# Install script for directory: /home/himank-goel/Documents/Object_Tracking/Code_base
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/himank-goel/Documents/Ext Project/Code_base/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/himank-goel/Documents/Object_Tracking/Code_base/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
