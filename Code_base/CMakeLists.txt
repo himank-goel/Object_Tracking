@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
-project(Passthrough_filter)
+project(cluster_extraction)
 
 find_package(PCL 1.2 REQUIRED)
 
@@ -8,5 +8,5 @@ include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_executable (passthrough passthrough_filter.cpp)
-target_link_libraries (passthrough ${PCL_LIBRARIES})
+add_executable (cluster_extraction cluster_extraction.cpp)
+target_link_libraries (cluster_extraction ${PCL_LIBRARIES})
