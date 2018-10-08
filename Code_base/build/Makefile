@@ -111,44 +111,44 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named passthrough
+# Target rules for targets named cluster_extraction
 
 # Build rule for target.
-passthrough: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 passthrough
-.PHONY : passthrough
+cluster_extraction: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 cluster_extraction
+.PHONY : cluster_extraction
 
 # fast build rule for target.
-passthrough/fast:
-	$(MAKE) -f CMakeFiles/passthrough.dir/build.make CMakeFiles/passthrough.dir/build
-.PHONY : passthrough/fast
+cluster_extraction/fast:
+	$(MAKE) -f CMakeFiles/cluster_extraction.dir/build.make CMakeFiles/cluster_extraction.dir/build
+.PHONY : cluster_extraction/fast
 
-passthrough_filter.o: passthrough_filter.cpp.o
+cluster_extraction.o: cluster_extraction.cpp.o
 
-.PHONY : passthrough_filter.o
+.PHONY : cluster_extraction.o
 
 # target to build an object file
-passthrough_filter.cpp.o:
-	$(MAKE) -f CMakeFiles/passthrough.dir/build.make CMakeFiles/passthrough.dir/passthrough_filter.cpp.o
-.PHONY : passthrough_filter.cpp.o
+cluster_extraction.cpp.o:
+	$(MAKE) -f CMakeFiles/cluster_extraction.dir/build.make CMakeFiles/cluster_extraction.dir/cluster_extraction.cpp.o
+.PHONY : cluster_extraction.cpp.o
 
-passthrough_filter.i: passthrough_filter.cpp.i
+cluster_extraction.i: cluster_extraction.cpp.i
 
-.PHONY : passthrough_filter.i
+.PHONY : cluster_extraction.i
 
 # target to preprocess a source file
-passthrough_filter.cpp.i:
-	$(MAKE) -f CMakeFiles/passthrough.dir/build.make CMakeFiles/passthrough.dir/passthrough_filter.cpp.i
-.PHONY : passthrough_filter.cpp.i
+cluster_extraction.cpp.i:
+	$(MAKE) -f CMakeFiles/cluster_extraction.dir/build.make CMakeFiles/cluster_extraction.dir/cluster_extraction.cpp.i
+.PHONY : cluster_extraction.cpp.i
 
-passthrough_filter.s: passthrough_filter.cpp.s
+cluster_extraction.s: cluster_extraction.cpp.s
 
-.PHONY : passthrough_filter.s
+.PHONY : cluster_extraction.s
 
 # target to generate assembly for a file
-passthrough_filter.cpp.s:
-	$(MAKE) -f CMakeFiles/passthrough.dir/build.make CMakeFiles/passthrough.dir/passthrough_filter.cpp.s
-.PHONY : passthrough_filter.cpp.s
+cluster_extraction.cpp.s:
+	$(MAKE) -f CMakeFiles/cluster_extraction.dir/build.make CMakeFiles/cluster_extraction.dir/cluster_extraction.cpp.s
+.PHONY : cluster_extraction.cpp.s
 
 # Help Target
 help:
@@ -158,10 +158,10 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... passthrough"
-	@echo "... passthrough_filter.o"
-	@echo "... passthrough_filter.i"
-	@echo "... passthrough_filter.s"
+	@echo "... cluster_extraction"
+	@echo "... cluster_extraction.o"
+	@echo "... cluster_extraction.i"
+	@echo "... cluster_extraction.s"
 .PHONY : help
 
 
