@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     pcl::search::KdTree<PointT>::Ptr tree(new pcl::search::KdTree<PointT>());
 
     // Datasets
-    pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>);
+    pcl::PointCloud<PointT>::Ptr cloud(new pcl::PointCloud<PointT>), cloud_f(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<PointT>::Ptr cloud_filtered(new pcl::PointCloud<PointT>);
     pcl::PointCloud<pcl::Normal>::Ptr cloud_normals(new pcl::PointCloud<pcl::Normal>);
     pcl::PointCloud<PointT>::Ptr cloud_filtered2(new pcl::PointCloud<PointT>);
@@ -49,8 +49,6 @@ int main(int argc, char **argv)
     vg.setLeafSize(0.01f, 0.01f, 0.01f);
     vg.filter(*cloud_filtered);
     std::cout << "PointCloud after filtering has: " << cloud_filtered->points.size() << " data points." << std::endl; //*
-
-
 
     // Estimate point normals
     ne.setSearchMethod(tree);
@@ -100,25 +98,38 @@ int main(int argc, char **argv)
     seg.setMaxIterations(10000);
     seg.setDistanceThreshold(0.05);
     seg.setRadiusLimits(0, 0.1);
-    seg.setInputCloud(cloud_filtered2);
-    seg.setInputNormals(cloud_normals2);
 
-    // Obtain the cylinder inliers and coefficients
-    seg.segment(*inliers_cylinder, *coefficients_cylinder);
-    std::cerr << "Cylinder coefficients: " << *coefficients_cylinder << std::endl;
+    int inc = 0, nr_points = (int)cloud_filtered2->points.size();
 
-    // Write the cylinder inliers to disk
-    extract.setInputCloud(cloud_filtered2);
-    extract.setIndices(inliers_cylinder);
-    extract.setNegative(false);
-    pcl::PointCloud<PointT>::Ptr cloud_cylinder(new pcl::PointCloud<PointT>());
-    extract.filter(*cloud_cylinder);
-    if (cloud_cylinder->points.empty())
-        std::cerr << "Can't find the cylindrical component." << std::endl;
-    else
+    while (cloud_filtered2->points.size() > 0.3 * nr_points)
     {
+        seg.setInputCloud(cloud_filtered2);
+        seg.setInputNormals(cloud_normals2);
+
+        // Obtain the cylinder inliers and coefficients
+        seg.segment(*inliers_cylinder, *coefficients_cylinder);
+        std::cerr << "Cylinder coefficients: " << *coefficients_cylinder << std::endl;
+
+        // Write the cylinder inliers to disk
+        extract.setInputCloud(cloud_filtered2);
+        extract.setIndices(inliers_cylinder);
+        extract.setNegative(false);
+        pcl::PointCloud<PointT>::Ptr cloud_cylinder(new pcl::PointCloud<PointT>());
+        extract.filter(*cloud_cylinder);
+        if (cloud_cylinder->points.empty())
+        {
+            std::cerr << "Can't find the cylindrical component." << std::endl;
+            break;
+        }
         std::cerr << "PointCloud representing the cylindrical component: " << cloud_cylinder->points.size() << " data points." << std::endl;
-        writer.write("cylinder.pcd", *cloud_cylinder, false);
+        std::stringstream ps;
+        ps << "cylinder_" << inc << ".pcd";
+        writer.write<pcl::PointXYZ>(ps.str(), *cloud_cylinder, false); //*
+        // writer.write(ps.str(), *cloud_cylinder, false);
+        extract.setNegative(true);
+        extract.filter(*cloud_f);
+        *cloud_filtered2 = *cloud_f;
+        inc += 1;
     }
     return (0);
 }
