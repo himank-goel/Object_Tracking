@@ -196,7 +196,7 @@ CMAKE_OBJCOPY:FILEPATH=/usr/bin/objcopy
 CMAKE_OBJDUMP:FILEPATH=/usr/bin/objdump
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=cluster_extraction
+CMAKE_PROJECT_NAME:STATIC=cylinder_segmentation
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
@@ -539,11 +539,23 @@ cluster_extraction_BINARY_DIR:STATIC=/home/himank-goel/Documents/Object_Tracking
 //Value Computed by CMake
 cluster_extraction_SOURCE_DIR:STATIC=/home/himank-goel/Documents/Object_Tracking/Code_base
 
+//Value Computed by CMake
+cylinder_segmentation_BINARY_DIR:STATIC=/home/himank-goel/Documents/Object_Tracking/Code_base/build
+
+//Value Computed by CMake
+cylinder_segmentation_SOURCE_DIR:STATIC=/home/himank-goel/Documents/Object_Tracking/Code_base
+
 //Path to a library.
 pkgcfg_lib_PC_FLANN_flann_cpp:FILEPATH=/usr/lib/x86_64-linux-gnu/libflann_cpp.so
 
 //Path to a library.
 pkgcfg_lib_PC_OPENNI_OpenNI:FILEPATH=/usr/lib/libOpenNI.so
+
+//Value Computed by CMake
+region_growing_segmentation_BINARY_DIR:STATIC=/home/himank-goel/Documents/Object_Tracking/Code_base/build
+
+//Value Computed by CMake
+region_growing_segmentation_SOURCE_DIR:STATIC=/home/himank-goel/Documents/Object_Tracking/Code_base
 
 
 ########################

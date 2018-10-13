@@ -111,44 +111,44 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named cluster_extraction
+# Target rules for targets named cylinder_segmentation
 
 # Build rule for target.
-cluster_extraction: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 cluster_extraction
-.PHONY : cluster_extraction
+cylinder_segmentation: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 cylinder_segmentation
+.PHONY : cylinder_segmentation
 
 # fast build rule for target.
-cluster_extraction/fast:
-	$(MAKE) -f CMakeFiles/cluster_extraction.dir/build.make CMakeFiles/cluster_extraction.dir/build
-.PHONY : cluster_extraction/fast
+cylinder_segmentation/fast:
+	$(MAKE) -f CMakeFiles/cylinder_segmentation.dir/build.make CMakeFiles/cylinder_segmentation.dir/build
+.PHONY : cylinder_segmentation/fast
 
-cluster_extraction.o: cluster_extraction.cpp.o
+cylinder_segmentation.o: cylinder_segmentation.cpp.o
 
-.PHONY : cluster_extraction.o
+.PHONY : cylinder_segmentation.o
 
 # target to build an object file
-cluster_extraction.cpp.o:
-	$(MAKE) -f CMakeFiles/cluster_extraction.dir/build.make CMakeFiles/cluster_extraction.dir/cluster_extraction.cpp.o
-.PHONY : cluster_extraction.cpp.o
+cylinder_segmentation.cpp.o:
+	$(MAKE) -f CMakeFiles/cylinder_segmentation.dir/build.make CMakeFiles/cylinder_segmentation.dir/cylinder_segmentation.cpp.o
+.PHONY : cylinder_segmentation.cpp.o
 
-cluster_extraction.i: cluster_extraction.cpp.i
+cylinder_segmentation.i: cylinder_segmentation.cpp.i
 
-.PHONY : cluster_extraction.i
+.PHONY : cylinder_segmentation.i
 
 # target to preprocess a source file
-cluster_extraction.cpp.i:
-	$(MAKE) -f CMakeFiles/cluster_extraction.dir/build.make CMakeFiles/cluster_extraction.dir/cluster_extraction.cpp.i
-.PHONY : cluster_extraction.cpp.i
+cylinder_segmentation.cpp.i:
+	$(MAKE) -f CMakeFiles/cylinder_segmentation.dir/build.make CMakeFiles/cylinder_segmentation.dir/cylinder_segmentation.cpp.i
+.PHONY : cylinder_segmentation.cpp.i
 
-cluster_extraction.s: cluster_extraction.cpp.s
+cylinder_segmentation.s: cylinder_segmentation.cpp.s
 
-.PHONY : cluster_extraction.s
+.PHONY : cylinder_segmentation.s
 
 # target to generate assembly for a file
-cluster_extraction.cpp.s:
-	$(MAKE) -f CMakeFiles/cluster_extraction.dir/build.make CMakeFiles/cluster_extraction.dir/cluster_extraction.cpp.s
-.PHONY : cluster_extraction.cpp.s
+cylinder_segmentation.cpp.s:
+	$(MAKE) -f CMakeFiles/cylinder_segmentation.dir/build.make CMakeFiles/cylinder_segmentation.dir/cylinder_segmentation.cpp.s
+.PHONY : cylinder_segmentation.cpp.s
 
 # Help Target
 help:
@@ -158,10 +158,10 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... cluster_extraction"
-	@echo "... cluster_extraction.o"
-	@echo "... cluster_extraction.i"
-	@echo "... cluster_extraction.s"
+	@echo "... cylinder_segmentation"
+	@echo "... cylinder_segmentation.o"
+	@echo "... cylinder_segmentation.i"
+	@echo "... cylinder_segmentation.s"
 .PHONY : help
 
 
