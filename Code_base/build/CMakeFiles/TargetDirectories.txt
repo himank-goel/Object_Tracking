@@ -1,3 +1,0 @@
-/home/himank-goel/Documents/Object_Tracking/Code_base/build/CMakeFiles/rebuild_cache.dir
-/home/himank-goel/Documents/Object_Tracking/Code_base/build/CMakeFiles/edit_cache.dir
-/home/himank-goel/Documents/Object_Tracking/Code_base/build/CMakeFiles/cylinder_segmentation.dir
