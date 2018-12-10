@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <string>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/filters/passthrough.h>
@@ -8,6 +9,17 @@
 
 float pntX1, pntY1, pntZ1, r;
 std::vector<float> x_coordinates, y_coordinates, z_coordinates;
+
+std::string addLeadingZero(int k) {
+    std::stringstream ss;
+    ss << k;
+    std::string final = ss.str();
+    int len = final.length();
+    for(int i=len; i<3; i++) {
+        final.insert(0, "0");
+    }
+    return final;
+}
 
 void midPointCircleAlgo()
 {
@@ -122,90 +134,60 @@ void midPointCircleAlgo()
     pcl::io::savePCDFileASCII("avg_pcd.pcd", avg_cloud);
 }
 
+pcl::PointCloud<pcl::PointXYZ>::Ptr filtering_func(std::string fileName) {
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr file(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr file_filtered(new pcl::PointCloud<pcl::PointXYZ>);
+    
+    if (pcl::io::loadPCDFile<pcl::PointXYZ>(fileName, *file) == -1) //* load the file
+    {
+        PCL_ERROR("Couldn't read file test_pcd.pcd \n");
+        return file;
+    }
+
+    pcl::VoxelGrid<pcl::PointXYZ> vg;
+    vg.setInputCloud(file);
+    vg.setLeafSize(0.05f, 0.05f, 0.05f);
+    vg.filter(*file_filtered);
+
+    pcl::PassThrough<pcl::PointXYZ> pass;
+    pass.setInputCloud(file_filtered);
+    pass.setFilterFieldName("x");
+    pass.setFilterLimits(-0.96, 12.21);
+
+    pass.filter(*file_filtered);
+
+    pass.setInputCloud(file_filtered);
+    pass.setFilterFieldName("y");
+    pass.setFilterLimits(-2.53, 2.34);
+
+    pass.filter(*file_filtered);
+
+    return file_filtered;
+
+}
+
+bool checkVicinity(float value, float boundary) {
+    return (float(boundary - 0.05) <= value && value <= float(boundary + 0.05));
+}
+
 int main(int argc, char **argv)
 {
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ> background_cloud;
+    pcl::PointCloud<pcl::PointXYZ> human_cloud;
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered_2(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
 
-// -------------------------------------------------------------------------------------------------------------
+    pcl::PointCloud<pcl::PointXYZ>::Ptr file_filtered(new pcl::PointCloud<pcl::PointXYZ>);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr loud(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr loud_filtered_2(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr loud_filtered(new pcl::PointCloud<pcl::PointXYZ>);
+    std::vector<float> human_x_coordinates, human_y_coordinates, human_z_coordinates;
+    std::vector<float> bg_x_coordinates, bg_y_coordinates, bg_z_coordinates;
 
-
-// -------------------------------------------------------------------------------------------------------------
-
-    if (pcl::io::loadPCDFile<pcl::PointXYZ>("../Pcd_Logs/2018-09-26_19-46-31.939/cloud000020.pcd", *cloud) == -1) //* load the file
-    {
-        PCL_ERROR("Couldn't read file test_pcd.pcd \n");
-        return (-1);
-    }
-
-// -------------------------------------------------------------------------------------------------------------
-
-    if (pcl::io::loadPCDFile<pcl::PointXYZ>("../Pcd_Logs/2018-09-26_19-46-31.939/cloud000021.pcd", *loud) == -1) //* load the file
-    {
-        PCL_ERROR("Couldn't read file test_pcd.pcd \n");
-        return (-1);
-    }
-
-// -------------------------------------------------------------------------------------------------------------
-
-    pcl::VoxelGrid<pcl::PointXYZ> vg;
-    vg.setInputCloud(cloud);
-    vg.setLeafSize(0.05f, 0.05f, 0.05f);
-    vg.filter(*cloud_filtered_2);
-
-
-    pcl::io::savePCDFileASCII("cloud_1_pcd.pcd", *cloud_filtered_2);
-
-// -------------------------------------------------------------------------------------------------------------
-
-    // pcl::VoxelGrid<pcl::PointXYZ> vg;
-    vg.setInputCloud(loud);
-    vg.setLeafSize(0.05f, 0.05f, 0.05f);
-    vg.filter(*loud_filtered_2);
-
-
-    pcl::io::savePCDFileASCII("cloud_2_pcd.pcd", *loud_filtered_2);
+    std::stringstream test_file;
+    test_file << "../Pcd_Logs/2018-09-26_19-46-31.939/cloud000020" << ".pcd";
     
-
-// -------------------------------------------------------------------------------------------------------------
-    pcl::PassThrough<pcl::PointXYZ> pass;
-    pass.setInputCloud(cloud_filtered_2);
-    pass.setFilterFieldName("x");
-    pass.setFilterLimits(-0.96, 12.21);
-
-    pass.filter(*cloud_filtered);
-
-    pass.setInputCloud(cloud_filtered);
-    pass.setFilterFieldName("y");
-    pass.setFilterLimits(-2.53, 2.34);
-
-    pass.filter(*cloud_filtered);
-
-// -------------------------------------------------------------------------------------------------------------
-
-    // pcl::PassThrough<pcl::PointXYZ> pass;
-    pass.setInputCloud(loud_filtered_2);
-    pass.setFilterFieldName("x");
-    pass.setFilterLimits(-0.96, 12.21);
-
-    pass.filter(*loud_filtered);
-
-    pass.setInputCloud(loud_filtered);
-    pass.setFilterFieldName("y");
-    pass.setFilterLimits(-2.53, 2.34);
-
-    pass.filter(*loud_filtered);
-
-
-// -------------------------------------------------------------------------------------------------------------
+    cloud_filtered = filtering_func(test_file.str());
 
     for (size_t i = 0; i < cloud_filtered->points.size(); ++i)
     {
@@ -214,41 +196,66 @@ int main(int argc, char **argv)
         z_coordinates.push_back(cloud_filtered->points[i].z);
     }
 
+    int point_count = 0 ;
     int k =0 ;
+    int m = 0;
 
     for(size_t i =0 ; i<cloud_filtered->points.size(); ++i) {
-        int flag = 1;
-        for(size_t j=0; j<loud_filtered->points.size(); ++j) {
-            if((cloud_filtered->points[i].x == loud_filtered->points[i].x) && (cloud_filtered->points[i].y == loud_filtered->points[i].y) && (cloud_filtered->points[i].z == loud_filtered->points[i].z )) {
-                flag = 0;
-                break;
+        for(k=0; k<495; k++) {
+            std::stringstream ps;
+            ps << "../Pcd_Logs/2018-09-26_19-46-31.939/cloud000" << addLeadingZero(k) << ".pcd";
+            file_filtered = filtering_func(ps.str());
+            // std::cout<<file_filtered->points.size()<<std::endl;
+            if(file_filtered->points.size() != 0) {
+                for(size_t j = 0; j<file_filtered->points.size(); ++j) {
+                    if(checkVicinity(cloud_filtered->points[i].x, file_filtered->points[j].x) && checkVicinity(cloud_filtered->points[i].y, file_filtered->points[j].y) && checkVicinity(cloud_filtered->points[i].z, file_filtered->points[j].z)) {
+                        point_count++;
+                    }
+                }
             }
         }
-        if(flag == 1) {
-            output_cloud->points[k].x = cloud_filtered->points[i].x;
-            output_cloud->points[k].y = cloud_filtered->points[i].y;
-            output_cloud->points[k].z = cloud_filtered->points[i].z;
+        if(point_count < 150) {
+            human_x_coordinates.push_back(cloud_filtered->points[i].x);
+            human_y_coordinates.push_back(cloud_filtered->points[i].y);
+            human_z_coordinates.push_back(cloud_filtered->points[i].z);
+            std::cout<<"human"<<std::endl;
+            k++;
+        } else {
+            bg_x_coordinates.push_back(cloud_filtered->points[i].x);
+            bg_y_coordinates.push_back(cloud_filtered->points[i].y);
+            bg_z_coordinates.push_back(cloud_filtered->points[i].z);
+            std::cout<<"bg"<<std::endl;
+            m++;
         }
+        point_count = 0;
     }
 
-    for(size_t i =0 ; i<loud_filtered->points.size(); ++i) {
-        int flag = 1;
-        for(size_t j=0; j<cloud_filtered->points.size(); ++j) {
-            if((cloud_filtered->points[i].x == loud_filtered->points[i].x) && (cloud_filtered->points[i].y == loud_filtered->points[i].y) && (cloud_filtered->points[i].z == loud_filtered->points[i].z )) {
-                flag = 0;
-                break;
-            }
-        }
-        if(flag == 1) {
-            output_cloud->points[k].x = loud_filtered->points[i].x;
-            output_cloud->points[k].y = loud_filtered->points[i].y;
-            output_cloud->points[k].z = loud_filtered->points[i].z;
-        }
+    human_cloud.width = k;
+    human_cloud.height = 1;
+    human_cloud.is_dense = false;
+    human_cloud.points.resize(human_cloud.width * human_cloud.height);
+
+    for (size_t i =0; i<human_cloud.points.size(); ++i) {
+        human_cloud.points[i].x = human_x_coordinates[i];
+        human_cloud.points[i].y = human_y_coordinates[i];
+        human_cloud.points[i].z = human_z_coordinates[i];
+    }
+
+    background_cloud.width = k;
+    background_cloud.height = 1;
+    background_cloud.is_dense = false;
+    background_cloud.points.resize(background_cloud.width * background_cloud.height);
+
+    for (size_t i =0; i<background_cloud.points.size(); ++i) {
+        background_cloud.points[i].x = bg_x_coordinates[i];
+        background_cloud.points[i].y = bg_y_coordinates[i];
+        background_cloud.points[i].z = bg_z_coordinates[i];
     }
 
     // midPointCircleAlgo();
 
-    pcl::io::savePCDFileASCII("test_pcd.pcd", *output_cloud);
+    pcl::io::savePCDFileASCII("human_pcd.pcd", human_cloud);
+    pcl::io::savePCDFileASCII("back_pcd.pcd", background_cloud);
 
     return (0);
 }
