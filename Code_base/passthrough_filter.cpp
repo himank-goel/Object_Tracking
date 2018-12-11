@@ -147,7 +147,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr filtering_func(std::string fileName) {
 
     pcl::VoxelGrid<pcl::PointXYZ> vg;
     vg.setInputCloud(file);
-    vg.setLeafSize(0.05f, 0.05f, 0.05f);
+    vg.setLeafSize(0.08f, 0.08f, 0.08f);
     vg.filter(*file_filtered);
 
     pcl::PassThrough<pcl::PointXYZ> pass;
@@ -189,23 +189,26 @@ int main(int argc, char **argv)
     
     cloud_filtered = filtering_func(test_file.str());
 
-    for (size_t i = 0; i < cloud_filtered->points.size(); ++i)
-    {
-        x_coordinates.push_back(cloud_filtered->points[i].x);
-        y_coordinates.push_back(cloud_filtered->points[i].y);
-        z_coordinates.push_back(cloud_filtered->points[i].z);
-    }
+    // for (size_t i = 0; i < cloud_filtered->points.size(); ++i)
+    // {
+    //     x_coordinates.push_back(cloud_filtered->points[i].x);
+    //     y_coordinates.push_back(cloud_filtered->points[i].y);
+    //     z_coordinates.push_back(cloud_filtered->points[i].z);
+    // }
 
     int point_count = 0 ;
-    int k =0 ;
-    int m = 0;
+    int h_count =0 ;
+    int b_count = 0;
+
+
+    std::cout<<cloud_filtered->points.size()<<std::endl;
 
     for(size_t i =0 ; i<cloud_filtered->points.size(); ++i) {
-        for(k=0; k<495; k++) {
+        std::cout<<i<<std::endl;
+        for(int k=0; k<150; k++) {
             std::stringstream ps;
             ps << "../Pcd_Logs/2018-09-26_19-46-31.939/cloud000" << addLeadingZero(k) << ".pcd";
             file_filtered = filtering_func(ps.str());
-            // std::cout<<file_filtered->points.size()<<std::endl;
             if(file_filtered->points.size() != 0) {
                 for(size_t j = 0; j<file_filtered->points.size(); ++j) {
                     if(checkVicinity(cloud_filtered->points[i].x, file_filtered->points[j].x) && checkVicinity(cloud_filtered->points[i].y, file_filtered->points[j].y) && checkVicinity(cloud_filtered->points[i].z, file_filtered->points[j].z)) {
@@ -214,23 +217,23 @@ int main(int argc, char **argv)
                 }
             }
         }
-        if(point_count < 150) {
+        if(point_count < 50) {
             human_x_coordinates.push_back(cloud_filtered->points[i].x);
             human_y_coordinates.push_back(cloud_filtered->points[i].y);
             human_z_coordinates.push_back(cloud_filtered->points[i].z);
             std::cout<<"human"<<std::endl;
-            k++;
+            h_count++;
         } else {
             bg_x_coordinates.push_back(cloud_filtered->points[i].x);
             bg_y_coordinates.push_back(cloud_filtered->points[i].y);
             bg_z_coordinates.push_back(cloud_filtered->points[i].z);
             std::cout<<"bg"<<std::endl;
-            m++;
+            b_count++;
         }
         point_count = 0;
     }
 
-    human_cloud.width = k;
+    human_cloud.width = h_count;
     human_cloud.height = 1;
     human_cloud.is_dense = false;
     human_cloud.points.resize(human_cloud.width * human_cloud.height);
@@ -241,7 +244,7 @@ int main(int argc, char **argv)
         human_cloud.points[i].z = human_z_coordinates[i];
     }
 
-    background_cloud.width = k;
+    background_cloud.width = b_count;
     background_cloud.height = 1;
     background_cloud.is_dense = false;
     background_cloud.points.resize(background_cloud.width * background_cloud.height);
