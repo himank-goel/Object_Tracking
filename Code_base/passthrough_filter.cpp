@@ -202,7 +202,7 @@ int main(int argc, char **argv)
     int b_count = 0;
 
 
-    std::cout<<cloud_filtered->points.size()<<std::endl;
+    // std::cout<<cloud_filtered->points.size()<<std::endl;
 
     for(size_t i=0; i<cloud_filtered->points.size(); i++) {
         std::cout<<i<<std::endl;
@@ -218,13 +218,15 @@ int main(int argc, char **argv)
             std::vector<float> pointRadiusSquaredDistance;
 
             if(file_filtered->points.size() != 0) {
-                if ( kdtree.radiusSearch (cloud_filtered->points[i], 0.05, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0 ){
+                if ( kdtree.radiusSearch (cloud_filtered->points[i], 0.03, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0 ){
                     point_count += pointIdxRadiusSearch.size();
                 }    
             }
         }
 
-        if(point_count < 50) {
+        std::cout<<point_count<<std::endl;
+
+        if(point_count < 50 && point_count > 10) {
             human_x_coordinates.push_back(cloud_filtered->points[i].x);
             human_y_coordinates.push_back(cloud_filtered->points[i].y);
             human_z_coordinates.push_back(cloud_filtered->points[i].z);
@@ -237,6 +239,7 @@ int main(int argc, char **argv)
             std::cout<<"bg"<<std::endl;
             b_count++;
         }
+        point_count = 0;
     }
 
     // for(size_t i =0 ; i<cloud_filtered->points.size(); ++i) {
