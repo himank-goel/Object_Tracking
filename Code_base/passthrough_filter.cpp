@@ -186,7 +186,7 @@ int main(int argc, char **argv)
     std::vector<float> bg_x_coordinates, bg_y_coordinates, bg_z_coordinates;
 
     std::stringstream test_file;
-    test_file << "../Pcd_Logs/2018-09-26_19-46-31.939/cloud000020" << ".pcd";
+    test_file << "../Pcd_Logs/2018-09-26_19-46-31.939/cloud000002" << ".pcd";
     
     cloud_filtered = filtering_func(test_file.str());
 
