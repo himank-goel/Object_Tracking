@@ -8,10 +8,12 @@
 #include <pcl/filters/passthrough.h>
 #include <pcl/filters/voxel_grid.h>
 
-struct coordinate {
+struct coordinate
+{
     float x, y, z;
 
-    bool operator <(const coordinate& pt) const {
+    bool operator<(const coordinate &pt) const
+    {
         return (x < pt.x) || ((!(pt.x < x)) && (y < pt.y)) || ((!(pt.x < x)) && (!(pt.y < y)) && (z < pt.z));
     }
 };
@@ -62,13 +64,40 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr filtering_func(std::string fileName)
     return file_filtered;
 }
 
+std::set<coordinate> findClosePoints(pcl::PointCloud<pcl::PointXYZ>::Ptr prev_human_file, pcl::KdTreeFLANN<pcl::PointXYZ> kdtree, float radius, pcl::PointCloud<pcl::PointXYZ>::Ptr current_file_filtered)
+{
+
+    std::set<coordinate> human_coordinates;
+
+    for (size_t i = 0; i < prev_human_file->points.size(); i++)
+    {
+
+        std::vector<int> pointIdxRadiusSearch;
+        std::vector<float> pointRadiusSquaredDistance;
+
+        if (kdtree.radiusSearch(prev_human_file->points[i], radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
+        {
+            for (size_t j = 0; j < pointIdxRadiusSearch.size(); ++j)
+            {
+                coordinate *current_point = new coordinate;
+                current_point->x = current_file_filtered->points[pointIdxRadiusSearch[j]].x;
+                current_point->y = current_file_filtered->points[pointIdxRadiusSearch[j]].y;
+                current_point->z = current_file_filtered->points[pointIdxRadiusSearch[j]].z;
+                human_coordinates.insert(*current_point);
+            }
+        }
+    }
+    return human_coordinates;
+}
+
 int main(int argc, char **argv)
 {
     //Variables for maintaining cloud version
     int current_file_number = 3;
 
-    for (int l = 4; l <= 50; l++)
+    for (int l = 4; l <= 495; l++)
     {
+        std::cout << l << std::endl;
         //To store the human_cloud
         pcl::PointCloud<pcl::PointXYZ> human_cloud;
         std::set<coordinate> human_coordinates;
@@ -98,31 +127,16 @@ int main(int argc, char **argv)
         kdtree.setInputCloud(current_file_filtered);
 
         float radius = 0.05;
-        if(prev_human_file->points.size() < 15) {
-            radius = 0.08;
-        }
 
         // Aux Variables
         int h_count = 0;
 
-        for (size_t i = 0; i < prev_human_file->points.size(); i++)
+        human_coordinates = findClosePoints(prev_human_file, kdtree, radius, current_file_filtered);
+
+        while (human_coordinates.size() < 20)
         {
-            std::cout << i << std::endl;
-
-            std::vector<int> pointIdxRadiusSearch;
-            std::vector<float> pointRadiusSquaredDistance;
-
-            if (kdtree.radiusSearch(prev_human_file->points[i], radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0)
-            {
-                for (size_t j = 0; j < pointIdxRadiusSearch.size(); ++j)
-                {
-                    coordinate *current_point = new coordinate;
-                    current_point->x = current_file_filtered->points[pointIdxRadiusSearch[j]].x;
-                    current_point->y = current_file_filtered->points[pointIdxRadiusSearch[j]].y;
-                    current_point->z = current_file_filtered->points[pointIdxRadiusSearch[j]].z;
-                    human_coordinates.insert(*current_point);
-                }
-            }
+            radius += 0.01;
+            human_coordinates = findClosePoints(prev_human_file, kdtree, radius, current_file_filtered);
         }
 
         //To store the bg_cloud
@@ -130,7 +144,8 @@ int main(int argc, char **argv)
         std::set<coordinate> back_coordinates;
         std::set<coordinate> total_coordinates;
 
-        for(size_t m = 0; m<current_file_filtered->points.size(); m++) {
+        for (size_t m = 0; m < current_file_filtered->points.size(); m++)
+        {
             coordinate *point = new coordinate;
             point->x = current_file_filtered->points[m].x;
             point->y = current_file_filtered->points[m].y;
@@ -138,16 +153,20 @@ int main(int argc, char **argv)
             total_coordinates.insert(*point);
         }
 
-        std::set<coordinate>:: iterator itr;
-        std::set<coordinate>:: iterator it;
+        std::set<coordinate>::iterator itr;
+        std::set<coordinate>::iterator it;
 
-        for(itr = total_coordinates.begin(); itr!=total_coordinates.end(); ++itr) {
+        for (itr = total_coordinates.begin(); itr != total_coordinates.end(); ++itr)
+        {
             int flag = 0;
-            for(it = human_coordinates.begin(); it!=human_coordinates.end(); it++) {
-                if((*it).x == (*itr).x && (*it).y == (*itr).y && (*it).z == (*itr).z) {
+            for (it = human_coordinates.begin(); it != human_coordinates.end(); it++)
+            {
+                if ((*it).x == (*itr).x && (*it).y == (*itr).y && (*it).z == (*itr).z)
+                {
                     flag = 1;
                 }
-                if(flag != 1) {
+                if (flag != 1)
+                {
                     back_coordinates.insert(*itr);
                 }
             }
@@ -159,7 +178,8 @@ int main(int argc, char **argv)
         human_cloud.points.resize(human_cloud.width * human_cloud.height);
 
         size_t i = 0;
-        for( it = human_coordinates.begin(); it!=human_coordinates.end(); ++it){
+        for (it = human_coordinates.begin(); it != human_coordinates.end(); ++it)
+        {
             human_cloud.points[i].x = (*it).x;
             human_cloud.points[i].y = (*it).y;
             human_cloud.points[i].z = (*it).z;
@@ -172,7 +192,8 @@ int main(int argc, char **argv)
         back_cloud.points.resize(back_cloud.width * back_cloud.height);
 
         i = 0;
-        for( it = back_coordinates.begin(); it!=back_coordinates.end(); ++it){
+        for (it = back_coordinates.begin(); it != back_coordinates.end(); ++it)
+        {
             back_cloud.points[i].x = (*it).x;
             back_cloud.points[i].y = (*it).y;
             back_cloud.points[i].z = (*it).z;
@@ -188,7 +209,6 @@ int main(int argc, char **argv)
         current_back_file_name << "../build/back_pcd/back_pcd_000" << addLeadingZero(current_file_number) << ".pcd";
 
         pcl::io::savePCDFileASCII(current_back_file_name.str(), back_cloud);
-
 
         current_file_number++;
     }
