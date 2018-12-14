@@ -8,5 +8,5 @@ include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 
-add_executable (passthrough_filter passthrough_filter.cpp)
-target_link_libraries (passthrough_filter ${PCL_LIBRARIES})
+add_executable (tracking tracking.cpp)
+target_link_libraries (tracking ${PCL_LIBRARIES})
