@@ -90,6 +90,64 @@ std::set<coordinate> findClosePoints(pcl::PointCloud<pcl::PointXYZ>::Ptr prev_hu
     return human_coordinates;
 }
 
+std::set<coordinate> findBackground(pcl::PointCloud<pcl::PointXYZ>::Ptr current_file_filtered, std::set<coordinate> human_coordinates)
+{
+
+    std::set<coordinate> back_coordinates;
+    std::set<coordinate> total_coordinates;
+
+    for (size_t m = 0; m < current_file_filtered->points.size(); m++)
+    {
+        coordinate *point = new coordinate;
+        point->x = current_file_filtered->points[m].x;
+        point->y = current_file_filtered->points[m].y;
+        point->z = current_file_filtered->points[m].z;
+        total_coordinates.insert(*point);
+    }
+
+    std::set<coordinate>::iterator itr;
+    std::set<coordinate>::iterator it;
+
+    for (itr = total_coordinates.begin(); itr != total_coordinates.end(); ++itr)
+    {
+        int flag = 0;
+        for (it = human_coordinates.begin(); it != human_coordinates.end(); it++)
+        {
+            if ((*it).x == (*itr).x && (*it).y == (*itr).y && (*it).z == (*itr).z)
+            {
+                flag = 1;
+            }
+            if (flag != 1)
+            {
+                back_coordinates.insert(*itr);
+            }
+        }
+    }
+    return back_coordinates;
+}
+
+pcl::PointCloud<pcl::PointXYZ> getCloud(std::set<coordinate> coordinates)
+{
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+    cloud.width = coordinates.size();
+    cloud.height = 1;
+    cloud.is_dense = false;
+    cloud.points.resize(cloud.width * cloud.height);
+
+    size_t i = 0;
+    std::set<coordinate>::iterator it;
+
+    for (it = coordinates.begin(); it != coordinates.end(); ++it)
+    {
+        cloud.points[i].x = (*it).x;
+        cloud.points[i].y = (*it).y;
+        cloud.points[i].z = (*it).z;
+        ++i;
+    }
+
+    return cloud;
+}
+
 int main(int argc, char **argv)
 {
     //Variables for maintaining cloud version
@@ -142,63 +200,11 @@ int main(int argc, char **argv)
         //To store the bg_cloud
         pcl::PointCloud<pcl::PointXYZ> back_cloud;
         std::set<coordinate> back_coordinates;
-        std::set<coordinate> total_coordinates;
 
-        for (size_t m = 0; m < current_file_filtered->points.size(); m++)
-        {
-            coordinate *point = new coordinate;
-            point->x = current_file_filtered->points[m].x;
-            point->y = current_file_filtered->points[m].y;
-            point->z = current_file_filtered->points[m].z;
-            total_coordinates.insert(*point);
-        }
+        back_coordinates = findBackground(current_file_filtered, human_coordinates);
 
-        std::set<coordinate>::iterator itr;
-        std::set<coordinate>::iterator it;
-
-        for (itr = total_coordinates.begin(); itr != total_coordinates.end(); ++itr)
-        {
-            int flag = 0;
-            for (it = human_coordinates.begin(); it != human_coordinates.end(); it++)
-            {
-                if ((*it).x == (*itr).x && (*it).y == (*itr).y && (*it).z == (*itr).z)
-                {
-                    flag = 1;
-                }
-                if (flag != 1)
-                {
-                    back_coordinates.insert(*itr);
-                }
-            }
-        }
-
-        human_cloud.width = human_coordinates.size();
-        human_cloud.height = 1;
-        human_cloud.is_dense = false;
-        human_cloud.points.resize(human_cloud.width * human_cloud.height);
-
-        size_t i = 0;
-        for (it = human_coordinates.begin(); it != human_coordinates.end(); ++it)
-        {
-            human_cloud.points[i].x = (*it).x;
-            human_cloud.points[i].y = (*it).y;
-            human_cloud.points[i].z = (*it).z;
-            ++i;
-        }
-
-        back_cloud.width = back_coordinates.size();
-        back_cloud.height = 1;
-        back_cloud.is_dense = false;
-        back_cloud.points.resize(back_cloud.width * back_cloud.height);
-
-        i = 0;
-        for (it = back_coordinates.begin(); it != back_coordinates.end(); ++it)
-        {
-            back_cloud.points[i].x = (*it).x;
-            back_cloud.points[i].y = (*it).y;
-            back_cloud.points[i].z = (*it).z;
-            ++i;
-        }
+        human_cloud = getCloud(human_coordinates);
+        back_cloud = getCloud(back_coordinates);
 
         std::stringstream current_human_file_name;
         current_human_file_name << "../build/human_pcd/human_pcd_000" << addLeadingZero(current_file_number) << ".pcd";
