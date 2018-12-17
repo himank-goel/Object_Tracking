@@ -90,6 +90,31 @@ std::set<coordinate> findClosePoints(pcl::PointCloud<pcl::PointXYZ>::Ptr prev_hu
     return human_coordinates;
 }
 
+std::set<coordinate> subtractSets(std::set<coordinate> setA, std::set<coordinate> setB) {
+    
+    std::set<coordinate> final_coordinates;
+
+    std::set<coordinate>::iterator itr;
+    std::set<coordinate>::iterator it;
+
+    for (itr = setA.begin(); itr != setA.end(); ++itr)
+    {
+        int flag = 0;
+        for (it = setB.begin(); it != setB.end(); it++)
+        {
+            if ((*it).x == (*itr).x && (*it).y == (*itr).y && (*it).z == (*itr).z)
+            {
+                flag = 1;
+            }
+        }
+        if (flag != 1)
+        {
+            final_coordinates.insert(*itr);
+        }
+    }
+    return final_coordinates;
+}
+
 std::set<coordinate> findBackground(pcl::PointCloud<pcl::PointXYZ>::Ptr current_file_filtered, std::set<coordinate> human_coordinates)
 {
 
@@ -105,24 +130,7 @@ std::set<coordinate> findBackground(pcl::PointCloud<pcl::PointXYZ>::Ptr current_
         total_coordinates.insert(*point);
     }
 
-    std::set<coordinate>::iterator itr;
-    std::set<coordinate>::iterator it;
-
-    for (itr = total_coordinates.begin(); itr != total_coordinates.end(); ++itr)
-    {
-        int flag = 0;
-        for (it = human_coordinates.begin(); it != human_coordinates.end(); it++)
-        {
-            if ((*it).x == (*itr).x && (*it).y == (*itr).y && (*it).z == (*itr).z)
-            {
-                flag = 1;
-            }
-            if (flag != 1)
-            {
-                back_coordinates.insert(*itr);
-            }
-        }
-    }
+    back_coordinates = subtractSets(total_coordinates, human_coordinates);
     return back_coordinates;
 }
 
@@ -197,13 +205,44 @@ int main(int argc, char **argv)
             human_coordinates = findClosePoints(prev_human_file, kdtree, radius, current_file_filtered);
         }
 
+        human_cloud = getCloud(human_coordinates);
+
+        // if ((current_file_number - 1) % 15 == 0)
+        // {
+        //     // Load prev back file
+        //     pcl::PointCloud<pcl::PointXYZ>::Ptr prev_back_file(new pcl::PointCloud<pcl::PointXYZ>);
+
+        //     std::stringstream prev_back_file_name;
+        //     prev_back_file_name << "../build/back_pcd/back_pcd_000" << addLeadingZero(current_file_number - 1) << ".pcd";
+
+        //     if (pcl::io::loadPCDFile<pcl::PointXYZ>(prev_back_file_name.str(), *prev_back_file) == -1) //* load the file
+        //     {
+        //         PCL_ERROR("Couldn't read file back.pcd \n");
+        //         return (-1);
+        //     }
+
+        //     pcl::PointCloud<pcl::PointXYZ>::Ptr humancloudPTR(&human_cloud);
+
+        //     //Kdtree
+        //     pcl::KdTreeFLANN<pcl::PointXYZ> kdtree_new;
+        //     kdtree_new.setInputCloud(humancloudPTR);
+
+        //     radius = 0.05;
+        //     std::set<coordinate> exclusive_coordinates;
+        //     exclusive_coordinates = findClosePoints(prev_back_file, kdtree_new, radius, humancloudPTR);
+
+        //     std::set<coordinate>::iterator itr;
+        //     std::set<coordinate>::iterator it;
+
+        //     human_coordinates = subtractSets(human_coordinates, exclusive_coordinates);
+        //     human_cloud = getCloud(human_coordinates);
+        // }
+
         //To store the bg_cloud
         pcl::PointCloud<pcl::PointXYZ> back_cloud;
         std::set<coordinate> back_coordinates;
 
         back_coordinates = findBackground(current_file_filtered, human_coordinates);
-
-        human_cloud = getCloud(human_coordinates);
         back_cloud = getCloud(back_coordinates);
 
         std::stringstream current_human_file_name;
