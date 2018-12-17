@@ -160,25 +160,30 @@ int main(int argc, char **argv)
 {
     //Variables for maintaining cloud version
     int current_file_number = 3;
+    
+    pcl::PointCloud<pcl::PointXYZ>::Ptr current_file_filtered(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr prev_human_file(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+        
+    //To store the human_cloud
+    pcl::PointCloud<pcl::PointXYZ> human_cloud;
+    std::set<coordinate> human_coordinates;
+    
+    //To store the bg_cloud
+    pcl::PointCloud<pcl::PointXYZ> back_cloud;
+    std::set<coordinate> back_coordinates;
 
     for (int l = 4; l <= 495; l++)
     {
-        std::cout << l << std::endl;
-        //To store the human_cloud
-        pcl::PointCloud<pcl::PointXYZ> human_cloud;
-        std::set<coordinate> human_coordinates;
-
+        std::cout << current_file_number << std::endl;
+        
         // Load Current File for inspection
-        pcl::PointCloud<pcl::PointXYZ>::Ptr current_file_filtered(new pcl::PointCloud<pcl::PointXYZ>);
-
         std::stringstream current_file_name;
         current_file_name << "../Pcd_Logs/2018-09-26_19-46-31.939/cloud000" << addLeadingZero(current_file_number) << ".pcd";
 
         current_file_filtered = filtering_func(current_file_name.str());
 
         // Load prev human file
-        pcl::PointCloud<pcl::PointXYZ>::Ptr prev_human_file(new pcl::PointCloud<pcl::PointXYZ>);
-
         std::stringstream prev_human_file_name;
         prev_human_file_name << "../build/human_pcd/human_pcd_000" << addLeadingZero(current_file_number - 1) << ".pcd";
 
@@ -189,13 +194,10 @@ int main(int argc, char **argv)
         }
 
         //Kdtree
-        pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
         kdtree.setInputCloud(current_file_filtered);
 
-        float radius = 0.05;
-
         // Aux Variables
-        int h_count = 0;
+        float radius = 0.05;
 
         human_coordinates = findClosePoints(prev_human_file, kdtree, radius, current_file_filtered);
 
@@ -214,7 +216,7 @@ int main(int argc, char **argv)
 
             std::stringstream prev_back_file_name;
             prev_back_file_name << "../build/back_pcd/back_pcd_000" << addLeadingZero(current_file_number - 1) << ".pcd";
-
+            
             if (pcl::io::loadPCDFile<pcl::PointXYZ>(prev_back_file_name.str(), *prev_back_file) == -1) //* load the file
             {
                 PCL_ERROR("Couldn't read file back.pcd \n");
@@ -224,23 +226,17 @@ int main(int argc, char **argv)
             pcl::PointCloud<pcl::PointXYZ>::Ptr humancloudPTR(&human_cloud);
 
             //Kdtree
-            pcl::KdTreeFLANN<pcl::PointXYZ> kdtree_new;
-            kdtree_new.setInputCloud(humancloudPTR);
+            kdtree.setInputCloud(humancloudPTR);
 
+            std::cout << "cu-cuc-cu" << std::endl;
             radius = 0.05;
             std::set<coordinate> exclusive_coordinates;
-            exclusive_coordinates = findClosePoints(prev_back_file, kdtree_new, radius, humancloudPTR);
+            exclusive_coordinates = findClosePoints(prev_back_file, kdtree, radius, humancloudPTR);
 
-            std::set<coordinate>::iterator itr;
-            std::set<coordinate>::iterator it;
-
-            human_coordinates = subtractSets(human_coordinates, exclusive_coordinates);
-            human_cloud = getCloud(human_coordinates);
+            std::set<coordinate> new_human_coordinates;
+            new_human_coordinates = subtractSets(human_coordinates, exclusive_coordinates);
+            human_cloud = getCloud(new_human_coordinates);
         }
-
-        //To store the bg_cloud
-        pcl::PointCloud<pcl::PointXYZ> back_cloud;
-        std::set<coordinate> back_coordinates;
 
         back_coordinates = findBackground(current_file_filtered, human_coordinates);
         back_cloud = getCloud(back_coordinates);
