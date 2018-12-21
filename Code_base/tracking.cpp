@@ -159,7 +159,7 @@ pcl::PointCloud<pcl::PointXYZ> getCloud(std::set<coordinate> coordinates)
 
 bool checkVicinity(float value, float boundary)
 {
-    return (float(boundary - 0.05) <= value && value <= float(boundary + 0.05));
+    return (float(boundary - 0.03) <= value && value <= float(boundary + 0.03));
 }
 
 int main(int argc, char **argv)
