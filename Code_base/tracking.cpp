@@ -31,6 +31,11 @@ std::string addLeadingZero(int k)
     return final;
 }
 
+bool checkVicinity(float value, float boundary)
+{
+    return (float(boundary - 0.03) <= value && value <= float(boundary + 0.03));
+}
+
 pcl::PointCloud<pcl::PointXYZ>::Ptr filtering_func(std::string fileName)
 {
 
@@ -179,11 +184,6 @@ pcl::PointCloud<pcl::PointXYZ> getCloud(std::set<coordinate> coordinates)
     }
 
     return cloud;
-}
-
-bool checkVicinity(float value, float boundary)
-{
-    return (float(boundary - 0.03) <= value && value <= float(boundary + 0.03));
 }
 
 int main(int argc, char **argv)
