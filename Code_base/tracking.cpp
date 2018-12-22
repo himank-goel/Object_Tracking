@@ -116,6 +116,30 @@ std::set<coordinate> subtractSets(std::set<coordinate> setA, std::set<coordinate
     return final_coordinates;
 }
 
+std::set<coordinate> backgroundValidation(std::set<coordinate> human_coordinates, pcl::PointCloud<pcl::PointXYZ>::Ptr prev_back_file)
+{
+
+    std::set<coordinate>::iterator it;
+    std::set<coordinate> exclusive_coordinates;
+
+    for (it = human_coordinates.begin(); it != human_coordinates.end(); ++it)
+    {
+        for (size_t ptr = 0; ptr < prev_back_file->points.size(); ++ptr)
+        {
+            if (checkVicinity(prev_back_file->points[ptr].x, (*it).x) && checkVicinity(prev_back_file->points[ptr].y, (*it).y) && checkVicinity(prev_back_file->points[ptr].z, (*it).z))
+            {
+                coordinate *point = new coordinate;
+                point->x = (*it).x;
+                point->y = (*it).y;
+                point->z = (*it).z;
+                exclusive_coordinates.insert(*point);
+            }
+        }
+    }
+
+    return exclusive_coordinates;
+}
+
 std::set<coordinate> findBackground(pcl::PointCloud<pcl::PointXYZ>::Ptr current_file_filtered, std::set<coordinate> human_coordinates)
 {
 
@@ -200,23 +224,7 @@ int main(int argc, char **argv)
             PCL_ERROR("Couldn't read file human.pcd \n");
             return (-1);
         }
-        std::cout << current_file_filtered->points.size() << std::endl;
-        //Kdtree
-        kdtree.setInputCloud(current_file_filtered);
 
-        // Aux Variables
-        float radius = 0.05;
-
-        human_coordinates = findClosePoints(prev_human_file, kdtree, radius, current_file_filtered);
-
-        while (human_coordinates.size() < 20)
-        {
-            radius += 0.01;
-            human_coordinates = findClosePoints(prev_human_file, kdtree, radius, current_file_filtered);
-        }
-
-        // if ((current_file_number - 1) % 15 == 0)
-        // {
         // Load prev back file
         pcl::PointCloud<pcl::PointXYZ>::Ptr prev_back_file(new pcl::PointCloud<pcl::PointXYZ>);
 
@@ -229,47 +237,35 @@ int main(int argc, char **argv)
             return (-1);
         }
 
-        // pcl::PointCloud<pcl::PointXYZ>::Ptr humancloudPTR(&human_cloud);
-
         //Kdtree
-        // kdtree.setInputCloud(humancloudPTR);
+        kdtree.setInputCloud(current_file_filtered);
 
-        std::set<coordinate>::iterator it;
-        std::set<coordinate> exclusive_coordinates;
+        // Aux Variables
+        float radius = 0.05;
 
-        for (it = human_coordinates.begin(); it != human_coordinates.end(); ++it)
+        // Find initial set of human points
+        human_coordinates = findClosePoints(prev_human_file, kdtree, radius, current_file_filtered);
+
+        // Maintain a minimum number of 20 points to represent human by increasing the radius
+        while (human_coordinates.size() < 20)
         {
-            for (size_t ptr = 0; ptr < prev_back_file->points.size(); ++ptr)
-            {
-                if (checkVicinity(prev_back_file->points[ptr].x, (*it).x) && checkVicinity(prev_back_file->points[ptr].y, (*it).y) && checkVicinity(prev_back_file->points[ptr].z, (*it).z))
-                {
-                    coordinate *point = new coordinate;
-                    point->x = (*it).x;
-                    point->y = (*it).y;
-                    point->z = (*it).z;
-                    exclusive_coordinates.insert(*point);
-                }
-            }
+            radius += 0.01;
+            human_coordinates = findClosePoints(prev_human_file, kdtree, radius, current_file_filtered);
         }
 
-        // std::cout << "cu-cuc-cu" << std::endl;
-        // radius = 0.05;
-        // exclusive_coordinates = findClosePoints(prev_back_file, kdtree, radius, humancloudPTR);
-
+        // Remove all points from humanm that are in vicinity to the previous background file
+        std::set<coordinate> exclusive_coordinates;
+        exclusive_coordinates = backgroundValidation(human_coordinates, prev_back_file);
         new_human_coordinates = subtractSets(human_coordinates, exclusive_coordinates);
 
-        // }
-
-        // if((current_file_number - 1) % 15 == 0) {
+        // Get human cloud
         human_cloud = getCloud(new_human_coordinates);
-        back_coordinates = findBackground(current_file_filtered, new_human_coordinates);
-        // } else {
-        //     human_cloud = getCloud(human_coordinates);
-        //     back_coordinates = findBackground(current_file_filtered, human_coordinates);
-        // }
 
+        // Get background coordinates and its corresponding cloud
+        back_coordinates = findBackground(current_file_filtered, new_human_coordinates);
         back_cloud = getCloud(back_coordinates);
 
+        // Write the human and background to files
         std::stringstream current_human_file_name;
         current_human_file_name << "../build/human_pcd/human_pcd_000" << addLeadingZero(current_file_number) << ".pcd";
 
