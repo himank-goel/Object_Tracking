@@ -189,6 +189,7 @@ int main(int argc, char **argv)
     pcl::PointCloud<pcl::PointXYZ>::Ptr current_file_filtered(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr prev_human_file(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr prev_back_file(new pcl::PointCloud<pcl::PointXYZ>);
+    
     pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
 
     //To store the human_cloud
@@ -199,7 +200,7 @@ int main(int argc, char **argv)
     pcl::PointCloud<pcl::PointXYZ> back_cloud;
     std::set<coordinate> back_coordinates;
 
-    std::set<coordinate> new_human_coordinates;
+    std::set<coordinate> new_back_coordinates;
 
     for (int l = 4; l <= 495; l++)
     {
@@ -213,7 +214,7 @@ int main(int argc, char **argv)
 
         // Load prev human file
         std::stringstream prev_human_file_name;
-        prev_human_file_name << "../build/human_pcd/human_pcd_000" << addLeadingZero(current_file_number - 1) << ".pcd";
+        prev_human_file_name << "../build/human_pcd_new/human_pcd_000" << addLeadingZero(current_file_number - 1) << ".pcd";
 
         if (pcl::io::loadPCDFile<pcl::PointXYZ>(prev_human_file_name.str(), *prev_human_file) == -1) //* load the file
         {
@@ -223,7 +224,7 @@ int main(int argc, char **argv)
 
         // Load prev back file
         std::stringstream prev_back_file_name;
-        prev_back_file_name << "../build/back_pcd/back_pcd_000" << addLeadingZero(current_file_number - 1) << ".pcd";
+        prev_back_file_name << "../build/back_pcd_new/back_pcd_000" << addLeadingZero(current_file_number - 1) << ".pcd";
 
         if (pcl::io::loadPCDFile<pcl::PointXYZ>(prev_back_file_name.str(), *prev_back_file) == -1) //* load the file
         {
@@ -237,36 +238,36 @@ int main(int argc, char **argv)
         // Aux Variables
         float radius = 0.05;
 
-        // Find initial set of human points
-        human_coordinates = findClosePoints(prev_human_file, kdtree, radius, current_file_filtered);
+        // Find initial set of bg points
+        back_coordinates = findClosePoints(prev_back_file, kdtree, radius, current_file_filtered);
 
-        // Maintain a minimum number of 20 points to represent human by increasing the radius
-        while (human_coordinates.size() < 20)
+        // Maintain a minimum number of 1000 points to represent human by increasing the radius
+        while (back_coordinates.size() < 1050)
         {
             radius += 0.01;
-            human_coordinates = findClosePoints(prev_human_file, kdtree, radius, current_file_filtered);
+            back_coordinates = findClosePoints(prev_back_file, kdtree, radius, current_file_filtered);
         }
 
-        // Remove all points from humanm that are in vicinity to the previous background file
+        // Remove all points from bg that are in vicinity to the previous human file
         std::set<coordinate> exclusive_coordinates;
-        exclusive_coordinates = backgroundValidation(human_coordinates, prev_back_file);
-        new_human_coordinates = subtractSets(human_coordinates, exclusive_coordinates);
+        exclusive_coordinates = backgroundValidation(back_coordinates, prev_human_file);
+        new_back_coordinates = subtractSets(back_coordinates, exclusive_coordinates);
 
-        // Get human cloud
-        human_cloud = getCloud(new_human_coordinates);
+        // Get bg cloud
+        back_cloud = getCloud(new_back_coordinates);
 
-        // Get background coordinates and its corresponding cloud
-        back_coordinates = findBackground(current_file_filtered, new_human_coordinates);
-        back_cloud = getCloud(back_coordinates);
+        // Get human coordinates and its corresponding cloud
+        human_coordinates = findBackground(current_file_filtered, new_back_coordinates);
+        human_cloud = getCloud(human_coordinates);
 
         // Write the human and background to files
         std::stringstream current_human_file_name;
-        current_human_file_name << "../build/human_pcd/human_pcd_000" << addLeadingZero(current_file_number) << ".pcd";
+        current_human_file_name << "../build/human_pcd_new/human_pcd_000" << addLeadingZero(current_file_number) << ".pcd";
 
         pcl::io::savePCDFileASCII(current_human_file_name.str(), human_cloud);
 
         std::stringstream current_back_file_name;
-        current_back_file_name << "../build/back_pcd/back_pcd_000" << addLeadingZero(current_file_number) << ".pcd";
+        current_back_file_name << "../build/back_pcd_new/back_pcd_000" << addLeadingZero(current_file_number) << ".pcd";
 
         pcl::io::savePCDFileASCII(current_back_file_name.str(), back_cloud);
 
