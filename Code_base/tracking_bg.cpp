@@ -187,7 +187,7 @@ int main(int argc, char **argv)
     int current_file_number = 3;
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr current_file_filtered(new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr prev_human_file(new pcl::PointCloud<pcl::PointXYZ>);
+    // pcl::PointCloud<pcl::PointXYZ>::Ptr prev_human_file(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr prev_back_file(new pcl::PointCloud<pcl::PointXYZ>);
     
     pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
@@ -202,7 +202,7 @@ int main(int argc, char **argv)
 
     std::set<coordinate> new_back_coordinates;
 
-    for (int l = 4; l <= 495; l++)
+    for (int l = 4; l <= 5; l++)
     {
         std::cout << current_file_number << std::endl;
 
@@ -212,21 +212,32 @@ int main(int argc, char **argv)
 
         current_file_filtered = filtering_func(current_file_name.str());
 
-        // Load prev human file
-        std::stringstream prev_human_file_name;
-        prev_human_file_name << "../build/human_pcd_new/human_pcd_000" << addLeadingZero(current_file_number - 1) << ".pcd";
+        // // Load prev human file
+        // std::stringstream prev_human_file_name;
+        // prev_human_file_name << "../build/human_pcd_new/human_pcd_000" << addLeadingZero(current_file_number - 1) << ".pcd";
 
-        if (pcl::io::loadPCDFile<pcl::PointXYZ>(prev_human_file_name.str(), *prev_human_file) == -1) //* load the file
-        {
-            PCL_ERROR("Couldn't read file human.pcd \n");
-            return (-1);
-        }
+        // if (pcl::io::loadPCDFile<pcl::PointXYZ>(prev_human_file_name.str(), *prev_human_file) == -1) //* load the file
+        // {
+        //     PCL_ERROR("Couldn't read file human.pcd \n");
+        //     return (-1);
+        // }
 
         // Load prev back file
-        std::stringstream prev_back_file_name;
-        prev_back_file_name << "../build/back_pcd_new/back_pcd_000" << addLeadingZero(current_file_number - 1) << ".pcd";
+        // std::stringstream prev_back_file_name;
+        // prev_back_file_name << "../build/back_pcd_new/back_pcd_000" << addLeadingZero(current_file_number - 1) << ".pcd";
 
-        if (pcl::io::loadPCDFile<pcl::PointXYZ>(prev_back_file_name.str(), *prev_back_file) == -1) //* load the file
+        // if (pcl::io::loadPCDFile<pcl::PointXYZ>(prev_back_file_name.str(), *prev_back_file) == -1) //* load the file
+        // {
+        //     PCL_ERROR("Couldn't read file back.pcd \n");
+        //     return (-1);
+        // }
+
+
+        // Load compiled back file
+        std::stringstream bg_file;
+        bg_file << "../build/back_pcd_new/back_compiled.pcd";
+
+        if (pcl::io::loadPCDFile<pcl::PointXYZ>(bg_file.str(), *prev_back_file) == -1) //* load the file
         {
             PCL_ERROR("Couldn't read file back.pcd \n");
             return (-1);
@@ -248,16 +259,16 @@ int main(int argc, char **argv)
             back_coordinates = findClosePoints(prev_back_file, kdtree, radius, current_file_filtered);
         }
 
-        // Remove all points from bg that are in vicinity to the previous human file
-        std::set<coordinate> exclusive_coordinates;
-        exclusive_coordinates = backgroundValidation(back_coordinates, prev_human_file);
-        new_back_coordinates = subtractSets(back_coordinates, exclusive_coordinates);
+        // // Remove all points from bg that are in vicinity to the previous human file
+        // std::set<coordinate> exclusive_coordinates;
+        // exclusive_coordinates = backgroundValidation(back_coordinates, prev_human_file);
+        // new_back_coordinates = subtractSets(back_coordinates, exclusive_coordinates);
 
         // Get bg cloud
-        back_cloud = getCloud(new_back_coordinates);
+        back_cloud = getCloud(back_coordinates);
 
         // Get human coordinates and its corresponding cloud
-        human_coordinates = findBackground(current_file_filtered, new_back_coordinates);
+        human_coordinates = findBackground(current_file_filtered, back_coordinates);
         human_cloud = getCloud(human_coordinates);
 
         // Write the human and background to files
