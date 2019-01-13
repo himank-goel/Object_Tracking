@@ -33,7 +33,7 @@ std::string addLeadingZero(int k)
 
 bool checkVicinity(float value, float boundary)
 {
-    return (float(boundary - 0.03) <= value && value <= float(boundary + 0.03));
+    return (float(boundary - 0.01) <= value && value <= float(boundary + 0.01));
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr filtering_func(std::string fileName)
@@ -184,7 +184,7 @@ pcl::PointCloud<pcl::PointXYZ> getCloud(std::set<coordinate> coordinates)
 int main(int argc, char **argv)
 {
     //Variables for maintaining cloud version
-    int current_file_number = 3;
+    int current_file_number = 261;
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr current_file_filtered(new pcl::PointCloud<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointXYZ>::Ptr prev_human_file(new pcl::PointCloud<pcl::PointXYZ>);
@@ -201,7 +201,7 @@ int main(int argc, char **argv)
 
     std::set<coordinate> new_human_coordinates;
 
-    for (int l = 4; l <= 495; l++)
+    for (int l = 262; l <= 495; l++)
     {
         std::cout << current_file_number << std::endl;
 

@@ -186,7 +186,7 @@ int main(int argc, char **argv)
     std::vector<float> bg_x_coordinates, bg_y_coordinates, bg_z_coordinates;
 
     std::stringstream test_file;
-    test_file << "../Pcd_Logs/2018-09-26_19-46-31.939/cloud000002" << ".pcd";
+    test_file << "../Pcd_Logs/2018-09-26_19-46-31.939/cloud000260" << ".pcd";
     
     cloud_filtered = filtering_func(test_file.str());
 
@@ -202,11 +202,11 @@ int main(int argc, char **argv)
     int b_count = 0;
 
 
-    // std::cout<<cloud_filtered->points.size()<<std::endl;
+    std::cout<<cloud_filtered->points.size()<<std::endl;
 
     for(size_t i=0; i<cloud_filtered->points.size(); i++) {
         std::cout<<i<<std::endl;
-        for(int k=0; k<150; k++) {
+        for(int k=200; k<350; k++) {
             std::stringstream ps;
             ps << "../Pcd_Logs/2018-09-26_19-46-31.939/cloud000" << addLeadingZero(k) << ".pcd";
             file_filtered = filtering_func(ps.str());
@@ -296,8 +296,8 @@ int main(int argc, char **argv)
 
     // midPointCircleAlgo();
 
-    pcl::io::savePCDFileASCII("human_pcd.pcd", human_cloud);
-    pcl::io::savePCDFileASCII("back_pcd.pcd", background_cloud);
+    pcl::io::savePCDFileASCII("human_pcd_260.pcd", human_cloud);
+    pcl::io::savePCDFileASCII("back_pcd_260.pcd", background_cloud);
 
     return (0);
 }
