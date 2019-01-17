@@ -33,7 +33,7 @@ std::string addLeadingZero(int k)
 
 bool checkVicinity(float value, float boundary)
 {
-    return (float(boundary - 0.01) <= value && value <= float(boundary + 0.01));
+    return (float(boundary - 0.03) <= value && value <= float(boundary + 0.03));
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr filtering_func(std::string fileName)
@@ -61,7 +61,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr filtering_func(std::string fileName)
 
     pass.setInputCloud(file_filtered);
     pass.setFilterFieldName("y");
-    pass.setFilterLimits(-2.53, 2.34);
+    pass.setFilterLimits(-2.46, 2.34);
 
     pass.filter(*file_filtered);
 
@@ -241,7 +241,7 @@ int main(int argc, char **argv)
         human_coordinates = findClosePoints(prev_human_file, kdtree, radius, current_file_filtered);
 
         // Maintain a minimum number of 20 points to represent human by increasing the radius
-        while (human_coordinates.size() < 20)
+        while (human_coordinates.size() < prev_human_file->points.size()-10)
         {
             radius += 0.01;
             human_coordinates = findClosePoints(prev_human_file, kdtree, radius, current_file_filtered);
@@ -249,7 +249,7 @@ int main(int argc, char **argv)
 
         // Remove all points from humanm that are in vicinity to the previous background file
         std::set<coordinate> exclusive_coordinates;
-        exclusive_coordinates = backgroundValidation(human_coordinates, prev_back_file);
+        // exclusive_coordinates = backgroundValidation(human_coordinates, prev_back_file);
         new_human_coordinates = subtractSets(human_coordinates, exclusive_coordinates);
 
         // Get human cloud
